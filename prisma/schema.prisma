@@ -16,6 +16,7 @@ model User {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   accounts    Account[]
+  widgets     Widget[]
 }
 
 model Account {
@@ -31,4 +32,21 @@ model Account {
   updatedAt         DateTime  @updatedAt
 
   @@unique([provider, providerAccountId])
+}
+
+model Widget {
+  id           String   @id @default(uuid())
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+  sourceId     String
+  name         String
+  title        String
+  priceCents   Int      @default(0)
+  view         String
+  defaultState Json
+  states       Json
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([userId, createdAt])
 }

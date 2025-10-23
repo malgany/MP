@@ -25,8 +25,75 @@
                 <h1>Bem-vindo(a) à área interna</h1>
                 <p>Use o botão de logout no cabeçalho quando quiser encerrar a sessão.</p>
             </div>
+            <div class="hero-actions" style="justify-content: flex-end; align-self: start;">
+                <button class="btn primary" data-open-add-widget>+ widget</button>
+            </div>
+        </section>
+
+        <section class="template-grid" id="user-widgets">
+            <header>
+                <h2>Seus widgets</h2>
+                <p>Widgets salvos ficam listados aqui.</p>
+            </header>
+            <div class="user-widgets-grid" data-widgets-list></div>
         </section>
     </main>
+
+    <!-- Modal Add widget -->
+    <input id="addWidgetToggle" type="checkbox" class="modal-toggle" hidden>
+    <div class="newsletter-modal" aria-hidden="true" data-add-widget-modal>
+        <label for="addWidgetToggle" class="modal-overlay" data-close-add-widget></label>
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="addWidgetTitle">
+            <header>
+                <h2 id="addWidgetTitle">Add widget</h2>
+                <label class="modal-close" title="Fechar" for="addWidgetToggle" data-close-add-widget>&times;</label>
+            </header>
+            <div class="modal-body">
+                <div data-initial-area>
+                    <p>Upload a .widget file or create new in Widget Studio</p>
+                    <div class="hero-actions">
+                        <a class="btn primary" href="https://widgets.chatkit.studio" target="_blank" rel="noopener">
+                            Create
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                <path d="M14 3h7v7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M10 14L21 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </a>
+                        <button class="btn ghost" type="button" data-upload-widget>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                <path d="M12 14V3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <path d="M7 8l5-5 5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            </svg>
+                            Upload
+                        </button>
+                        <input type="file" accept=".widget" hidden data-widget-file>
+                    </div>
+                </div>
+
+                <div class="hero-actions" data-preview-block hidden>
+                    <div data-widget-preview></div>
+                    <form class="modal-form" data-widget-form>
+                        <label class="form-label">Title</label>
+                        <input type="text" maxlength="150" placeholder="Title" data-widget-title>
+
+                        <label class="form-label">Price (US$)</label>
+                        <input type="text" inputmode="decimal" placeholder="$0.00" data-widget-price disabled>
+
+                        <label class="toggle">
+                            <input type="checkbox" data-widget-free checked>
+                            <span>Free</span>
+                        </label>
+                        <div class="hero-actions" style="justify-content: flex-end;">
+                            <button type="button" class="btn ghost" data-cancel-widget>Cancelar</button>
+                            <button type="submit" class="btn primary" data-save-widget disabled>Salvar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="/assets/js/app.js"></script>
 </body>

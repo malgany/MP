@@ -15,14 +15,6 @@ a {
   text-decoration: none;
 }
 
-button {
-  font: inherit;
-  color: inherit;
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-
 .top-bar {
   position: sticky;
   top: 0;
@@ -558,6 +550,22 @@ main {
   box-shadow: 0 20px 48px color-mix(in oklab, var(--gray-950, #0f172a) 12%, transparent);
 }
 
+/* Grid mais compacto para widgets do usuário */
+.user-widgets-grid {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.user-widgets-grid .product-card {
+  padding: 16px;
+}
+
+.user-widgets-grid .product-thumb {
+  padding-top: 56%;
+}
+
 .modal-card header {
   display: flex;
   justify-content: space-between;
@@ -569,6 +577,9 @@ main {
   font-weight: 600;
   cursor: pointer;
   transition: transform 0.2s ease;
+  position: absolute;
+  top: 10px;
+  right: 12px;
 }
 
 .modal-close:hover {
@@ -590,6 +601,70 @@ main {
 .modal-form {
   display: grid;
   gap: 12px;
+}
+
+.modal-form input[type="text"],
+.modal-form input[type="number"] {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: var(--radius-xl, 0.75rem);
+  border: 1px solid var(--gray-250, #d4d4d8);
+  background-color: var(--gray-0, #ffffff);
+  color: var(--gray-900, #111827);
+  font-size: 15px;
+}
+
+.modal-form input::placeholder {
+  color: var(--gray-500, #64748b);
+}
+
+.modal-form input:focus {
+  outline: 2px solid var(--gray-950, #0f172a);
+  outline-offset: 2px;
+}
+
+.form-label {
+  font-weight: 600;
+  color: var(--gray-800, #1f2937);
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  user-select: none;
+}
+
+.toggle input[type="checkbox"] {
+  width: 42px;
+  height: 24px;
+  appearance: none;
+  background: var(--gray-300, #cbd5e1);
+  border-radius: 999px;
+  position: relative;
+  outline: none;
+  transition: background-color 0.2s ease;
+}
+
+.toggle input[type="checkbox"]::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  background: #ffffff;
+  border-radius: 999px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+  transition: transform 0.2s ease;
+}
+
+.toggle input[type="checkbox"]:checked {
+  background: var(--gray-950, #0f172a);
+}
+
+.toggle input[type="checkbox"]:checked::after {
+  transform: translateX(18px);
 }
 
 .sr-only {
@@ -663,9 +738,14 @@ main {
   margin-bottom: 16px;
 }
 
-.detail-summary p {
+.detail-summary p, .modal-body p {
   margin: 0 0 22px;
   color: var(--gray-600, #475569);
+}
+
+#addWidgetTitle {
+  font-size: clamp(24px, 4.5vw, 32px);
+  color: var(--gray-950, #0f172a);
 }
 
 .detail-cta {
