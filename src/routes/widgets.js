@@ -9,6 +9,20 @@ const upload = multer({
 });
 
 const router = Router();
+async function renderPreviewWithRetries(view, defaultState) {
+  const delays = [20, 100, 250];
+  for (const delay of delays) {
+    try {
+      const html = await renderWidgetToHtml(view, defaultState, { flushDelay: delay });
+      if (html && String(html).trim().length > 0) {
+        return { html, usedDelay: delay };
+      }
+    } catch (err) {
+      // tenta novamente com próximo delay
+    }
+  }
+  return { html: '', usedDelay: delays[delays.length - 1] };
+}
 
 router.post('/preview', upload.single('file'), async (req, res) => {
   try {
@@ -72,7 +86,19 @@ router.post('/', async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const list = await listWidgetsByUserId(req.user.id);
-    return res.json(list);
+    // Gera um HTML de preview para cada widget usando a view e o estado padrão
+    const enriched = await Promise.all(
+      list.map(async (item) => {
+        try {
+          const { html: previewHtml } = await renderPreviewWithRetries(item.view, item.defaultState);
+          return { ...item, previewHtml };
+        } catch (_e) {
+          return { ...item, previewHtml: '' };
+        }
+      })
+    );
+    res.set('Cache-Control', 'no-store');
+    return res.json(enriched);
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error('[widgets/list] erro:', error);

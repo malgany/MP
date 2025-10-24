@@ -285,7 +285,6 @@ main {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 18px;
 }
 
 .product-preview-canvas {
@@ -540,7 +539,7 @@ main {
 .modal-card {
   position: relative;
   width: min(480px, 100%);
-  padding: 28px;
+  padding: 28px 32px; /* espaço ligeiramente maior à direita */
   border-radius: var(--radius-3xl, 1.25rem);
   background-color: var(--gray-0, #ffffff);
   border: 1px solid var(--gray-150, #e2e8f0);
@@ -554,7 +553,7 @@ main {
 .user-widgets-grid {
   margin-top: 16px;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
 }
 
@@ -564,6 +563,26 @@ main {
 
 .user-widgets-grid .product-thumb {
   padding-top: 56%;
+}
+
+/* Centraliza e impede o iframe de esticar além do conteúdo dentro dos cards do usuário */
+.user-widgets-grid .product-preview-canvas {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.user-widgets-grid .product-preview-canvas > iframe {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .user-widgets-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .modal-card header {
@@ -614,6 +633,12 @@ main {
   font-size: 15px;
 }
 
+/* Campo Title maior */
+.modal-form input[data-widget-title] {
+  font-size: 18px;
+  padding: 14px 16px;
+}
+
 .modal-form input::placeholder {
   color: var(--gray-500, #64748b);
 }
@@ -621,6 +646,38 @@ main {
 .modal-form input:focus {
   outline: 2px solid var(--gray-950, #0f172a);
   outline-offset: 2px;
+}
+
+/* Aparência de desabilitado (Free ativo) */
+.modal-form input[disabled] {
+  background-color: var(--gray-100, #f1f5f9);
+  color: var(--gray-500, #64748b);
+  border-color: var(--gray-200, #e5e7eb);
+  cursor: not-allowed;
+}
+
+/* Erros de validação inline */
+.input-invalid {
+  border-color: #ef4444 !important;
+  outline: 2px solid #ef4444 !important;
+  outline-offset: 0;
+}
+
+.input-error {
+  color: #b91c1c;
+  font-size: 13px;
+}
+
+/* Alerta personalizado na área do modal */
+.form-alert {
+  display: grid;
+  gap: 6px;
+  padding: 12px 14px;
+  border-radius: var(--radius-xl, 0.75rem);
+  background: linear-gradient(180deg, rgba(254, 226, 226, 0.95), rgba(252, 165, 165, 0.85));
+  border: 1px solid #fecaca;
+  color: #991b1b;
+  font-weight: 600;
 }
 
 .form-label {

@@ -75,11 +75,14 @@
                 <div class="hero-actions" data-preview-block hidden>
                     <div data-widget-preview></div>
                     <form class="modal-form" data-widget-form>
+                        <div class="form-alert" data-form-alert hidden></div>
                         <label class="form-label">Title</label>
                         <input type="text" maxlength="150" placeholder="Title" data-widget-title>
+                        <div class="input-error" data-title-error hidden></div>
 
                         <label class="form-label">Price (US$)</label>
-                        <input type="text" inputmode="decimal" placeholder="$0.00" data-widget-price disabled>
+                        <input type="text" inputmode="decimal" placeholder="0.00" data-widget-price disabled>
+                        <div class="input-error" data-price-error hidden></div>
 
                         <label class="toggle">
                             <input type="checkbox" data-widget-free checked>

@@ -15,46 +15,50 @@ document.addEventListener('DOMContentLoaded', () => {
   const saveBtn = modal ? modal.querySelector('[data-save-widget]') : null;
   const cancelBtn = modal ? modal.querySelector('[data-cancel-widget]') : null;
   const initialArea = modal ? modal.querySelector('[data-initial-area]') : null;
+  const formAlert = modal ? modal.querySelector('[data-form-alert]') : null;
+  const titleError = modal ? modal.querySelector('[data-title-error]') : null;
+  const priceError = modal ? modal.querySelector('[data-price-error]') : null;
   const listContainer = document.querySelector('[data-widgets-list]');
 
   let lastPreviewPayload = null;
 
-  if (!logoutButton) {
-    // still continue for app widgets UI
-  }
+  if (logoutButton) {
+    logoutButton.addEventListener('click', async (event) => {
+      event.preventDefault();
 
-  logoutButton.addEventListener('click', async (event) => {
-    event.preventDefault();
+      try {
+        const response = await fetch('/auth/logout', {
+          method: 'POST',
+          headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+          },
+        });
 
-    try {
-      const response = await fetch('/auth/logout', {
-        method: 'POST',
-        headers: {
-          'X-Requested-With': 'XMLHttpRequest',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`Falha ao encerrar a sessão (${response.status})`);
+        if (!response.ok) {
+          throw new Error(`Falha ao encerrar a sessão (${response.status})`);
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        window.location.href = '/';
       }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      window.location.href = '/';
-    }
-  });
+    });
+  }
 
   // ----- Add widget modal logic -----
   function openModal() {
     if (modalToggle) modalToggle.checked = true;
+    if (modal) modal.setAttribute('aria-hidden', 'false');
   }
   function closeModal() {
     if (modalToggle) modalToggle.checked = false;
+    if (modal) modal.setAttribute('aria-hidden', 'true');
     if (previewBlock) previewBlock.hidden = true;
     if (initialArea) initialArea.hidden = false;
     if (previewContainer) previewContainer.innerHTML = '';
     if (form) form.reset();
     if (saveBtn) saveBtn.disabled = true;
+    clearErrors();
     lastPreviewPayload = null;
   }
 
@@ -62,7 +66,11 @@ document.addEventListener('DOMContentLoaded', () => {
     openAddBtn.addEventListener('click', openModal);
   }
   if (closeModalEls) {
-    closeModalEls.forEach((el) => el.addEventListener('click', closeModal));
+    closeModalEls.forEach((el) => el.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      closeModal();
+    }));
   }
   if (cancelBtn) {
     cancelBtn.addEventListener('click', (e) => {
@@ -81,7 +89,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // fechar clicando fora
   if (modal) {
     const overlay = modal.querySelector('.modal-overlay');
-    if (overlay) overlay.addEventListener('click', closeModal);
+    if (overlay) overlay.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      closeModal();
+    });
   }
 
   if (uploadBtn && fileInput) {
@@ -111,7 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       } catch (err) {
         console.error(err);
-        alert('Não foi possível processar o widget.');
+        showAlert('Could not process the widget file.');
       }
     });
   }
@@ -130,15 +142,25 @@ document.addEventListener('DOMContentLoaded', () => {
         priceUsd: priceInput && priceInput.value ? parseCurrency(priceInput.value) : 0,
       };
       // validações obrigatórias
+      clearErrors();
+      let hasError = false;
       if (!payload.title.trim()) {
-        alert('Title is required.');
-        return;
+        setFieldError(titleInput, titleError, 'Title is required.');
+        hasError = true;
       }
       if (freeToggle && !freeToggle.checked) {
-        if (!priceInput || !priceInput.value.trim()) {
-          alert('Price is required unless Free is enabled.');
-          return;
+        const priceText = (priceInput && priceInput.value) ? String(priceInput.value).trim() : '';
+        if (!priceText) {
+          setFieldError(priceInput, priceError, 'Price is required unless Free is enabled.');
+          hasError = true;
+        } else if (!isFinite(parseCurrency(priceText))) {
+          setFieldError(priceInput, priceError, 'Enter a valid USD amount.');
+          hasError = true;
         }
+      }
+      if (hasError) {
+        showAlert('Please fix the highlighted fields and try again.');
+        return;
       }
       try {
         const resp = await fetch('/api/widgets', {
@@ -152,7 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
         closeModal();
       } catch (err) {
         console.error(err);
-        alert('Não foi possível salvar o widget.');
+        showAlert('Could not save the widget. Please try again.');
       }
     });
   }
@@ -164,7 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
     card.innerHTML = `
       <div class="product-thumb">
         <div class="product-preview">
-          <div class="product-preview-canvas">${html || ''}</div>
+          <div class="product-preview-canvas"></div>
         </div>
       </div>
       <div class="product-body">
@@ -173,13 +195,40 @@ document.addEventListener('DOMContentLoaded', () => {
         <p>${escapeHtml(widget.name)}</p>
       </div>
     `;
+    const canvas = card.querySelector('.product-preview-canvas');
+    const htmlToUse = html != null ? html : (widget && widget.previewHtml) || '';
+    if (canvas && htmlToUse) {
+      const frame = document.createElement('iframe');
+      frame.setAttribute('loading', 'lazy');
+      frame.setAttribute('referrerpolicy', 'no-referrer');
+      frame.style.width = '100%';
+      frame.style.height = '100%';
+      frame.style.border = '0';
+      frame.srcdoc = buildPreviewSrcdoc(String(htmlToUse));
+      canvas.appendChild(frame);
+    }
     listContainer.prepend(card);
+  }
+
+  function buildPreviewSrcdoc(innerHtml) {
+    return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="/lib/core.css">
+<style>
+  html,body{height:100%;transform-origin: 0 0;transform: scale(0.8);}
+  body{margin: 24% 0px 0px 40%;display:flex;align-items:center;justify-content:center;background:transparent}
+</style>
+</head><body>${innerHtml}</body></html>`;
   }
 
   // máscara de moeda USD
   function parseCurrency(text) {
     const cleaned = String(text).replace(/[^0-9.]/g, '');
-    const value = Number(cleaned || '0');
+    const parts = cleaned.split('.');
+    const intPart = parts[0] || '0';
+    const fracPart = (parts[1] || '').slice(0, 2); // até 2 casas decimais
+    const normalized = fracPart ? `${intPart}.${fracPart}` : intPart;
+    const value = Number(normalized || '0');
     return isFinite(value) ? value : 0;
   }
 
@@ -204,8 +253,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const caret = priceInput.selectionStart;
       const cleaned = priceInput.value.replace(/[^0-9.]/g, '');
       const parts = cleaned.split('.');
-      const safe = parts.length > 2 ? `${parts[0]}.${parts.slice(1).join('')}` : cleaned;
-      priceInput.value = safe;
+      const merged = parts.length > 2 ? `${parts[0]}.${parts.slice(1).join('')}` : cleaned;
+      const [iPart, fPartRaw = ''] = merged.split('.');
+      const fPart = fPartRaw.slice(0, 2); // limita a 2 casas
+      priceInput.value = fPart ? `${iPart}.${fPart}` : iPart;
       try { priceInput.setSelectionRange(caret, caret); } catch (_) {}
     });
   }
@@ -216,6 +267,28 @@ document.addEventListener('DOMContentLoaded', () => {
       priceInput.disabled = isFree;
       if (isFree) priceInput.value = '';
     });
+  }
+
+  function setFieldError(inputEl, errorEl, message) {
+    if (inputEl) inputEl.classList.add('input-invalid');
+    if (errorEl) {
+      errorEl.textContent = message || '';
+      errorEl.hidden = false;
+    }
+  }
+
+  function clearErrors() {
+    if (formAlert) formAlert.hidden = true;
+    if (titleInput) titleInput.classList.remove('input-invalid');
+    if (priceInput) priceInput.classList.remove('input-invalid');
+    if (titleError) { titleError.textContent = ''; titleError.hidden = true; }
+    if (priceError) { priceError.textContent = ''; priceError.hidden = true; }
+  }
+
+  function showAlert(message) {
+    if (!formAlert) return;
+    formAlert.textContent = String(message || 'An error occurred.');
+    formAlert.hidden = false;
   }
 
   function escapeHtml(s) {
@@ -231,12 +304,11 @@ document.addEventListener('DOMContentLoaded', () => {
   async function loadExisting() {
     try {
       if (!listContainer) return;
-      const resp = await fetch('/api/widgets');
+      const resp = await fetch('/api/widgets', { cache: 'no-store' });
       if (!resp.ok) return;
       const items = await resp.json();
       for (const w of items) {
-        // render simples: reusa título/preço e deixa sem preview até usuário abrir novamente
-        appendWidgetCard(w, '');
+        appendWidgetCard(w, null);
       }
     } catch (err) {
       console.error(err);
