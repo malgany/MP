@@ -155,6 +155,8 @@ main {
   color: var(--gray-0, #ffffff);
 }
 
+/* removed red variant from use in confirm; primary (black) is used */
+
 .btn.ghost {
   border-color: var(--gray-200, #e5e7eb);
   color: var(--gray-950, #0f172a);
@@ -549,6 +551,37 @@ main {
   box-shadow: 0 20px 48px color-mix(in oklab, var(--gray-950, #0f172a) 12%, transparent);
 }
 
+.modal-card.small {
+  width: min(520px, 100%);
+}
+
+.deleteConfirmTitle h2 {
+  /* tamanho padrão de h2 já usado no app */
+  font-size: clamp(24px, 4.5vw, 32px);
+  color: var(--gray-950, #0f172a);
+  margin: 0;
+}
+
+/* Preview modal larger */
+.modal-card.preview-modal {
+  width: min(1024px, 100%);
+}
+
+.view-iframe-wrapper {
+  width: 100%;
+  height: 80vh;
+  border-radius: var(--radius-2xl, 1rem);
+  overflow: hidden;
+  border: 1px solid var(--gray-150, #e2e8f0);
+}
+
+.view-iframe-wrapper > iframe {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border: 0;
+}
+
 /* Grid mais compacto para widgets do usuário */
 .user-widgets-grid {
   margin-top: 16px;
@@ -740,18 +773,41 @@ main {
   padding: 32px clamp(24px, 6vw, 72px);
   border-top: 1px solid var(--gray-150, #e2e8f0);
   background-color: var(--gray-0, #ffffff);
-  display: grid;
-  gap: 12px;
   color: var(--gray-600, #475569);
 }
 
+.footer-container {
+  max-width: 1040px;
+  margin: 0 auto;
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+  text-align: center;
+}
+
+.footer-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--gray-900, #111827);
+  font-weight: 600;
+}
+
+.footer-note {
+  margin: 0;
+}
+
 .footer-socials {
-  display: flex;
+  display: inline-flex;
   gap: 16px;
 }
 
 .footer-socials a:hover {
   color: var(--gray-950, #0f172a);
+}
+
+.footer-legal {
+  color: var(--gray-500, #64748b);
 }
 
 .page-detail main {

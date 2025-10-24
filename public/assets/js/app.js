@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-  const logoutButton = document.querySelector('[data-logout]');
   const openAddBtn = document.querySelector('[data-open-add-widget]');
   const modalToggle = document.getElementById('addWidgetToggle');
   const modal = document.querySelector('[data-add-widget-modal]');
@@ -19,31 +18,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const titleError = modal ? modal.querySelector('[data-title-error]') : null;
   const priceError = modal ? modal.querySelector('[data-price-error]') : null;
   const listContainer = document.querySelector('[data-widgets-list]');
+  // View modal elements
+  const viewModalToggle = document.getElementById('viewWidgetToggle');
+  const viewModal = document.querySelector('[data-view-widget-modal]');
+  const viewContainer = viewModal ? viewModal.querySelector('[data-view-iframe]') : null;
+  // Delete confirm modal
+  const deleteToggle = document.getElementById('deleteConfirmToggle');
+  const deleteModal = document.querySelector('[data-delete-confirm-modal]');
+  const deleteConfirmBtn = deleteModal ? deleteModal.querySelector('[data-confirm-delete]') : null;
+  const deleteCancelEls = deleteModal ? deleteModal.querySelectorAll('[data-cancel-delete]') : [];
+  let pendingDelete = null; // { id, onDone }
 
   let lastPreviewPayload = null;
 
-  if (logoutButton) {
-    logoutButton.addEventListener('click', async (event) => {
-      event.preventDefault();
-
-      try {
-        const response = await fetch('/auth/logout', {
-          method: 'POST',
-          headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error(`Falha ao encerrar a sessão (${response.status})`);
-        }
-      } catch (error) {
-        console.error(error);
-      } finally {
-        window.location.href = '/';
-      }
-    });
-  }
+  // logout control now handled by header.js
 
   // ----- Add widget modal logic -----
   function openModal() {
@@ -60,6 +48,28 @@ document.addEventListener('DOMContentLoaded', () => {
     if (saveBtn) saveBtn.disabled = true;
     clearErrors();
     lastPreviewPayload = null;
+  }
+
+  // ----- View widget modal logic -----
+  function openViewModal(innerHtml) {
+    if (!viewModal || !viewContainer) return;
+    if (viewModalToggle) viewModalToggle.checked = true;
+    viewModal.setAttribute('aria-hidden', 'false');
+    // mount iframe
+    viewContainer.innerHTML = '';
+    const frame = document.createElement('iframe');
+    frame.style.width = '100%';
+    frame.style.height = '100%';
+    frame.style.border = '0';
+    frame.setAttribute('referrerpolicy', 'no-referrer');
+    frame.srcdoc = buildFullPreviewSrcdoc(String(innerHtml || ''));
+    viewContainer.appendChild(frame);
+  }
+
+  function closeViewModal() {
+    if (viewModalToggle) viewModalToggle.checked = false;
+    if (viewModal) viewModal.setAttribute('aria-hidden', 'true');
+    if (viewContainer) viewContainer.innerHTML = '';
   }
 
   if (openAddBtn) {
@@ -84,6 +94,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.key === 'Escape' && modalToggle && modalToggle.checked) {
       closeModal();
     }
+    if (e.key === 'Escape' && viewModalToggle && viewModalToggle.checked) {
+      closeViewModal();
+    }
   });
 
   // fechar clicando fora
@@ -93,6 +106,56 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       e.stopPropagation();
       closeModal();
+    });
+  }
+
+  if (viewModal) {
+    const overlay = viewModal.querySelector('.modal-overlay');
+    if (overlay) overlay.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      closeViewModal();
+    });
+    const closeEls = viewModal.querySelectorAll('[data-close-view-widget]');
+    closeEls.forEach((el) => el.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      closeViewModal();
+    }));
+  }
+
+  // delete confirm modal wiring
+  function openDeleteConfirm(widgetId, onDone) {
+    pendingDelete = { id: widgetId, onDone };
+    if (deleteToggle) deleteToggle.checked = true;
+    if (deleteModal) deleteModal.setAttribute('aria-hidden', 'false');
+  }
+  function closeDeleteConfirm() {
+    if (deleteToggle) deleteToggle.checked = false;
+    if (deleteModal) deleteModal.setAttribute('aria-hidden', 'true');
+    pendingDelete = null;
+  }
+  if (deleteModal) {
+    const overlay = deleteModal.querySelector('.modal-overlay');
+    if (overlay) overlay.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); closeDeleteConfirm(); });
+    deleteCancelEls.forEach((el) => el.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); closeDeleteConfirm(); }));
+  }
+  if (deleteConfirmBtn) {
+    deleteConfirmBtn.addEventListener('click', async () => {
+      if (!pendingDelete) return;
+      const { id, onDone } = pendingDelete;
+      try {
+        deleteConfirmBtn.disabled = true;
+        const resp = await fetch(`/api/widgets/${encodeURIComponent(id)}`, { method: 'DELETE', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+        if (!resp.ok) throw new Error('Delete failed');
+        if (typeof onDone === 'function') onDone();
+        closeDeleteConfirm();
+      } catch (err) {
+        console.error(err);
+        alert('Could not delete widget.');
+      } finally {
+        deleteConfirmBtn.disabled = false;
+      }
     });
   }
 
@@ -108,7 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
           method: 'POST',
           body: formData,
         });
-        if (!resp.ok) throw new Error('Falha no preview');
+        if (!resp.ok) throw new Error('Preview failed');
         const data = await resp.json();
         lastPreviewPayload = data;
         if (previewContainer) previewContainer.innerHTML = data.html || '';
@@ -168,7 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         });
-        if (!resp.ok) throw new Error('Falha ao salvar');
+        if (!resp.ok) throw new Error('Save failed');
         const created = await resp.json();
         appendWidgetCard(created, lastPreviewPayload.html);
         closeModal();
@@ -192,7 +255,24 @@ document.addEventListener('DOMContentLoaded', () => {
       <div class="product-body">
         <h3>${escapeHtml(widget.title || widget.name)}</h3>
         <div class="product-price">${widget.priceCents ? formatUSD((widget.priceCents || 0)/100) : 'Free'}</div>
-        <p>${escapeHtml(widget.name)}</p>
+        <div class="hero-actions">
+          <button type="button" class="btn ghost" data-view-widget>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+            </svg>
+            View
+          </button>
+          <button type="button" class="btn ghost" data-delete-widget>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M3 6h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+              <path d="M10 11v6M14 11v6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            Delete
+          </button>
+        </div>
       </div>
     `;
     const canvas = card.querySelector('.product-preview-canvas');
@@ -207,6 +287,20 @@ document.addEventListener('DOMContentLoaded', () => {
       frame.srcdoc = buildPreviewSrcdoc(String(htmlToUse));
       canvas.appendChild(frame);
     }
+    // actions
+    const viewBtn = card.querySelector('[data-view-widget]');
+    if (viewBtn) {
+      viewBtn.addEventListener('click', () => {
+        openViewModal(String(htmlToUse || ''));
+      });
+    }
+    const deleteBtn = card.querySelector('[data-delete-widget]');
+    if (deleteBtn) {
+      deleteBtn.addEventListener('click', () => {
+        if (!widget || !widget.id) return;
+        openDeleteConfirm(widget.id, () => card.remove());
+      });
+    }
     listContainer.prepend(card);
   }
 
@@ -217,6 +311,18 @@ document.addEventListener('DOMContentLoaded', () => {
 <style>
   html,body{height:100%;transform-origin: 0 0;transform: scale(0.8);}
   body{margin: 24% 0px 0px 40%;display:flex;align-items:center;justify-content:center;background:transparent}
+</style>
+</head><body>${innerHtml}</body></html>`;
+  }
+
+  function buildFullPreviewSrcdoc(innerHtml) {
+    return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="/lib/core.css">
+<style>
+  html,body{height:100%;}
+  body{margin:0;display:flex;align-items:center;justify-content:center;background:#ffffff}
+  :root{color-scheme: light}
 </style>
 </head><body>${innerHtml}</body></html>`;
   }

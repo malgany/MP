@@ -33,9 +33,16 @@ async function listWidgetsByUserId(userId) {
   });
 }
 
+async function deleteWidgetByIdForUser(id, userId) {
+  return prisma.widget.deleteMany({
+    where: { id, userId },
+  });
+}
+
 module.exports = {
   createWidget,
   listWidgetsByUserId,
+  deleteWidgetByIdForUser,
 };
 
 

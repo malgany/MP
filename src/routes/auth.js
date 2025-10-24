@@ -3,6 +3,11 @@ const passport = require('passport');
 
 const router = Router();
 
+router.get('/status', (req, res) => {
+  const isAuthenticated = Boolean(req.user);
+  res.json({ authenticated: isAuthenticated, user: isAuthenticated ? { id: req.user.id, displayName: req.user.displayName } : null });
+});
+
 router.get(
   '/google',
   passport.authenticate('google', {

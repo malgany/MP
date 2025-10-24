@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="pt-BR" data-theme="light">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Área interna | Widget for ChatKit</title>
+    <title>Dashboard | Widget for ChatKit</title>
     <link rel="preconnect" href="https://cdn.openai.com">
     <link rel="preload" href="https://cdn.openai.com/common/fonts/openai-sans/v2/OpenAISans-Regular.woff2" as="font" type="font/woff2" crossorigin="anonymous">
     <link rel="preload" href="https://cdn.openai.com/common/fonts/openai-sans/v2/OpenAISans-Semibold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
@@ -16,14 +16,20 @@
             <img src="/assets/img/logo.png" alt="Widget for ChatKit logo" class="brand-logo">
             <span class="brand-name">Widget for ChatKit</span>
         </div>
-        <a class="cta-subscribe" href="#" data-logout>Sair</a>
+        <nav class="main-nav">
+            <a class="nav-link active" href="/">Home</a>
+            <a class="nav-link" href="/">Wildcats</a>
+            <a class="nav-link" href="/">Neolaser</a>
+            <a class="nav-link" href="/">Contato</a>
+        </nav>
+        <a class="cta-subscribe" href="/auth/google" data-auth-cta>Entrar com Google</a>
     </header>
 
     <main class="dashboard-shell">
         <section class="hero">
             <div class="hero-content">
-                <h1>Bem-vindo(a) à área interna</h1>
-                <p>Use o botão de logout no cabeçalho quando quiser encerrar a sessão.</p>
+                <h1>Welcome to your dashboard</h1>
+                <p>Use the logout button in the header when you want to end your session.</p>
             </div>
             <div class="hero-actions" style="justify-content: flex-end; align-self: start;">
                 <button class="btn primary" data-open-add-widget>+ widget</button>
@@ -32,8 +38,8 @@
 
         <section class="template-grid" id="user-widgets">
             <header>
-                <h2>Seus widgets</h2>
-                <p>Widgets salvos ficam listados aqui.</p>
+                <h2>Your widgets</h2>
+                <p>Saved widgets are listed here.</p>
             </header>
             <div class="user-widgets-grid" data-widgets-list></div>
         </section>
@@ -46,11 +52,11 @@
         <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="addWidgetTitle">
             <header>
                 <h2 id="addWidgetTitle">Add widget</h2>
-                <label class="modal-close" title="Fechar" for="addWidgetToggle" data-close-add-widget>&times;</label>
+                <label class="modal-close" title="Close" for="addWidgetToggle" data-close-add-widget>&times;</label>
             </header>
             <div class="modal-body">
                 <div data-initial-area>
-                    <p>Upload a .widget file or create new in Widget Studio</p>
+                    <p>Upload a .widget file or create a new one in Widget Studio</p>
                     <div class="hero-actions">
                         <a class="btn primary" href="https://widgets.chatkit.studio" target="_blank" rel="noopener">
                             Create
@@ -89,8 +95,8 @@
                             <span>Free</span>
                         </label>
                         <div class="hero-actions" style="justify-content: flex-end;">
-                            <button type="button" class="btn ghost" data-cancel-widget>Cancelar</button>
-                            <button type="submit" class="btn primary" data-save-widget disabled>Salvar</button>
+                            <button type="button" class="btn ghost" data-cancel-widget>Cancel</button>
+                            <button type="submit" class="btn primary" data-save-widget disabled>Save</button>
                         </div>
                     </form>
                 </div>
@@ -98,6 +104,41 @@
         </div>
     </div>
 
+    <!-- Modal View widget -->
+    <input id="viewWidgetToggle" type="checkbox" class="modal-toggle" hidden>
+    <div class="newsletter-modal" aria-hidden="true" data-view-widget-modal>
+        <label for="viewWidgetToggle" class="modal-overlay" data-close-view-widget></label>
+        <div class="modal-card preview-modal" role="dialog" aria-modal="true" aria-labelledby="viewWidgetTitle">
+            <header>
+                <h2 id="viewWidgetTitle">Preview</h2>
+                <label class="modal-close" title="Close" for="viewWidgetToggle" data-close-view-widget>&times;</label>
+            </header>
+            <div class="modal-body">
+                <div class="view-iframe-wrapper" data-view-iframe></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Confirm Delete -->
+    <input id="deleteConfirmToggle" type="checkbox" class="modal-toggle" hidden>
+    <div class="newsletter-modal" aria-hidden="true" data-delete-confirm-modal>
+        <label for="deleteConfirmToggle" class="modal-overlay" data-cancel-delete></label>
+        <div class="modal-card small" role="dialog" aria-modal="true" aria-labelledby="deleteConfirmTitle">
+            <header class="deleteConfirmTitle">
+                <h2 id="deleteConfirmTitle">Delete widget</h2>
+                <label class="modal-close" title="Close" for="deleteConfirmToggle" data-cancel-delete>&times;</label>
+            </header>
+            <div class="modal-body">
+                <p>Are you sure you want to delete this widget? This action cannot be undone.</p>
+                <div class="hero-actions" style="justify-content: flex-end;">
+                    <button type="button" class="btn ghost" data-cancel-delete>Cancel</button>
+                    <button type="button" class="btn primary" data-confirm-delete>Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="/assets/js/app.js"></script>
+    <script src="/assets/js/header.js"></script>
 </body>
 </html>

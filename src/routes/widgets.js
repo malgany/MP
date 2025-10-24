@@ -1,7 +1,7 @@
 const { Router } = require('express');
 const multer = require('multer');
 const { renderWidgetToHtml } = require('../../lib');
-const { createWidget, listWidgetsByUserId } = require('../repositories/widgetRepository');
+const { createWidget, listWidgetsByUserId, deleteWidgetByIdForUser } = require('../repositories/widgetRepository');
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -103,6 +103,20 @@ router.get('/', async (req, res) => {
     // eslint-disable-next-line no-console
     console.error('[widgets/list] erro:', error);
     return res.status(400).json({ message: 'Falha ao listar widgets' });
+  }
+});
+
+router.delete('/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) return res.status(400).json({ message: 'ID ausente' });
+    const result = await deleteWidgetByIdForUser(id, req.user.id);
+    if (!result || !result.count) return res.status(404).json({ message: 'Not found' });
+    return res.status(204).end();
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('[widgets/delete] erro:', error);
+    return res.status(400).json({ message: 'Falha ao excluir widget' });
   }
 });
 
