@@ -267,14 +267,17 @@ main {
 .product-grid {
   margin-top: clamp(28px, 5vw, 36px);
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: clamp(24px, 4vw, 32px);
+  /* responsividade fluida: define a largura mínima por breakpoint */
+  grid-template-columns: repeat(auto-fill, minmax(var(--card-min, 280px), 1fr));
 }
+@media (min-width: 640px) { .product-grid { --card-min: 300px; } }
+@media (min-width: 1024px) { .product-grid { --card-min: 320px; } }
+@media (min-width: 1440px) { .product-grid { --card-min: 340px; } }
 
 .product-card {
   display: grid;
   gap: 18px;
-  padding: 24px;
   border-radius: var(--radius-3xl, 1.25rem);
   background-color: var(--gray-0, #ffffff);
   border: 1px solid var(--gray-150, #e2e8f0);
@@ -287,10 +290,15 @@ main {
   box-shadow: 0 20px 48px color-mix(in oklab, var(--gray-950, #0f172a) 10%, transparent);
 }
 
+.product-body {
+  padding: 0px 24px 15px 24px;  
+}
+
 .product-thumb {
   position: relative;
   width: 100%;
-  padding-top: 64%;
+  /* Proporção fixa 16:9 para evitar distorções */
+  aspect-ratio: 16 / 9;
   border-radius: var(--radius-2xl, 1rem);
   background: linear-gradient(135deg, var(--gray-150, #e2e8f0), var(--gray-300, #cbd5f5));
   overflow: hidden;
@@ -601,16 +609,18 @@ main {
 .user-widgets-grid {
   margin-top: 16px;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
+  /* responsiva como a home, mas mantendo espaçamento compacto */
+  grid-template-columns: repeat(auto-fill, minmax(var(--user-card-min, 280px), 1fr));
 }
-
-.user-widgets-grid .product-card {
-  padding: 16px;
-}
+@media (min-width: 640px) { .user-widgets-grid { --user-card-min: 300px; } }
+@media (min-width: 1024px) { .user-widgets-grid { --user-card-min: 320px; } }
+@media (min-width: 1440px) { .user-widgets-grid { --user-card-min: 340px; } }
 
 .user-widgets-grid .product-thumb {
-  padding-top: 56%;
+  /* usa a mesma proporção 16:9 e remove o hack de padding */
+  aspect-ratio: 16 / 9;
+  padding-top: 0;
 }
 
 /* Centraliza e impede o iframe de esticar além do conteúdo dentro dos cards do usuário */
