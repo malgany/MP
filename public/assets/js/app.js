@@ -203,6 +203,9 @@ document.addEventListener('DOMContentLoaded', () => {
         states: lastPreviewPayload.states,
         title: (titleInput && titleInput.value) || '',
         priceUsd: priceInput && priceInput.value ? parseCurrency(priceInput.value) : 0,
+        rawBase64: lastPreviewPayload.rawBase64 || '',
+        fileName: lastPreviewPayload.fileName || '',
+        fileExt: lastPreviewPayload.fileExt || '',
       };
       // validações obrigatórias
       clearErrors();
@@ -263,6 +266,14 @@ document.addEventListener('DOMContentLoaded', () => {
             </svg>
             View
           </button>
+          <a class="btn ghost" data-download-widget href="/api/widgets/${encodeURIComponent(widget.id || '')}/download">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 3v11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              <path d="M7 12l5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            Download
+          </a>
           <button type="button" class="btn ghost" data-delete-widget>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M3 6h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>

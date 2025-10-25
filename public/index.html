@@ -18,9 +18,8 @@
         </div>
         <nav class="main-nav">
             <a class="nav-link active" href="#home">Home</a>
-            <a class="nav-link" href="#templates">Wildcats</a>
-            <a class="nav-link" href="#newsletter">Neolaser</a>
-            <a class="nav-link" href="#footer">Contato</a>
+            <a class="nav-link" href="#templates">Widgets</a>
+            <a class="nav-link" href="#creators">Creator</a>
         </nav>
         <a class="cta-subscribe" href="/auth/google" data-auth-cta>Entrar com Google</a>
     </header>
@@ -43,26 +42,27 @@
             </div>
         </section>
 
-        <section class="filters" id="discover">
-            <div class="filter-tabs price-toggle" role="tablist" aria-label="Price filter">
-                <button type="button" class="filter-tab active" aria-selected="true">Free</button>
-                <button type="button" class="filter-tab" aria-selected="false">Premium</button>
-            </div>
-        </section>
-
         <section class="template-grid" id="templates">
             <header>
                 <h2>Featured widgets</h2>
                 <p>Pick a widget, preview it, and use it in your chat flows.</p>
+                <div class="template-actions">
+                    <label for="priceFilter" class="sr-only">Price filter</label>
+                    <select id="priceFilter" data-filter-select class="filter-inline">
+                        <option value="all" selected>All (Free + Premium)</option>
+                        <option value="free">Free</option>
+                        <option value="premium">Premium</option>
+                    </select>
+                </div>
             </header>
-            <div class="product-grid" data-widgets-grid></div>
+            <div class="product-grid user-widgets-grid" data-widgets-grid></div>
         </section>
 
         <section class="load-more">
-            <button type="button" class="btn ghost">Load more</button>
+            <button type="button" class="btn ghost" data-load-more>Load more</button>
         </section>
 
-        <section class="creator-cta" id="newsletter">
+        <section class="creator-cta" id="creators">
             <div class="creator-card">
                 <h2>Become a creator</h2>
                 <p>Submit your widget to the Widget for ChatKit gallery, showcase your work, and get paid — all in a few clicks.</p>
@@ -72,6 +72,21 @@
             </div>
         </section>
     </main>
+
+    <!-- Modal View widget (landing) -->
+    <input id="viewWidgetToggle" type="checkbox" class="modal-toggle" hidden>
+    <div class="newsletter-modal" aria-hidden="true" data-view-widget-modal>
+        <label for="viewWidgetToggle" class="modal-overlay" data-close-view-widget></label>
+        <div class="modal-card preview-modal" role="dialog" aria-modal="true" aria-labelledby="viewWidgetTitle">
+            <header>
+                <h2 id="viewWidgetTitle">Preview</h2>
+                <label class="modal-close" title="Close" for="viewWidgetToggle" data-close-view-widget>&times;</label>
+            </header>
+            <div class="modal-body">
+                <div class="view-iframe-wrapper" data-view-iframe></div>
+            </div>
+        </div>
+    </div>
 
 
     <footer class="footer-minimal" id="footer">

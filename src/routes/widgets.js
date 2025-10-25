@@ -1,7 +1,7 @@
 const { Router } = require('express');
 const multer = require('multer');
 const { renderWidgetToHtml } = require('../../lib');
-const { createWidget, listWidgetsByUserId, deleteWidgetByIdForUser } = require('../repositories/widgetRepository');
+const { createWidget, listWidgetsByUserId, deleteWidgetByIdForUser, getWidgetById } = require('../repositories/widgetRepository');
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -9,6 +9,17 @@ const upload = multer({
 });
 
 const router = Router();
+function buildDownloadFileName() {
+  const now = new Date();
+  const pad = (n) => String(n).padStart(2, '0');
+  const yyyy = now.getFullYear();
+  const mm = pad(now.getMonth() + 1);
+  const dd = pad(now.getDate());
+  const hh = pad(now.getHours());
+  const mi = pad(now.getMinutes());
+  const ss = pad(now.getSeconds());
+  return `widget_${yyyy}-${mm}-${dd}_${hh}-${mi}-${ss}.widget`;
+}
 async function renderPreviewWithRetries(view, defaultState) {
   const delays = [20, 100, 250];
   for (const delay of delays) {
@@ -47,7 +58,10 @@ router.post('/preview', upload.single('file'), async (req, res) => {
     }
 
     const html = await renderWidgetToHtml(view, defaultState, { flushDelay: 20 });
-    return res.json({ sourceId, name, view, defaultState, states: states || [], html });
+    const fileName = req.file.originalname;
+    const fileExt = (fileName.split('.').pop() || '').toLowerCase();
+    const rawBase64 = Buffer.from(req.file.buffer).toString('base64');
+    return res.json({ sourceId, name, view, defaultState, states: states || [], html, rawBase64, fileName, fileExt });
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error('[widgets/preview] erro:', error);
@@ -57,7 +71,7 @@ router.post('/preview', upload.single('file'), async (req, res) => {
 
 router.post('/', async (req, res) => {
   try {
-    const { sourceId, name, view, defaultState, states, title, priceUsd } = req.body || {};
+    const { sourceId, name, view, defaultState, states, title, priceUsd, rawBase64, fileName, fileExt } = req.body || {};
     if (!sourceId || !name || !view || !defaultState) {
       return res.status(400).json({ message: 'Campos obrigatórios ausentes' });
     }
@@ -73,6 +87,9 @@ router.post('/', async (req, res) => {
       view,
       defaultState,
       states: states ?? [],
+      rawBase64: typeof rawBase64 === 'string' && rawBase64.length > 0 ? rawBase64 : null,
+      fileName: fileName ? String(fileName).slice(0, 255) : null,
+      fileExt: fileExt ? String(fileExt).slice(0, 20) : null,
     });
 
     return res.status(201).json(created);
@@ -117,6 +134,47 @@ router.delete('/:id', async (req, res) => {
     // eslint-disable-next-line no-console
     console.error('[widgets/delete] erro:', error);
     return res.status(400).json({ message: 'Falha ao excluir widget' });
+  }
+});
+
+// Download widget (.widget)
+router.get('/:id/download', async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) return res.status(400).json({ message: 'ID ausente' });
+    const widget = await getWidgetById(id);
+    if (!widget) return res.status(404).json({ message: 'Not found' });
+
+    const isOwner = widget.userId === req.user.id;
+    const isFree = Number(widget.priceCents || 0) === 0;
+    if (!isOwner && !isFree) {
+      return res.status(403).json({ message: 'Acesso negado' });
+    }
+
+    let fileBuffer;
+    const fileName = buildDownloadFileName();
+    if (widget.raw && typeof widget.raw === 'string') {
+      fileBuffer = Buffer.from(widget.raw, 'base64');
+    } else {
+      // fallback: reconstruir
+      const encoded = Buffer.from(JSON.stringify({
+        id: widget.sourceId,
+        name: widget.name,
+        view: widget.view,
+        defaultState: widget.defaultState,
+        states: widget.states,
+      }), 'utf8').toString('base64');
+      const root = { encodedWidget: encoded };
+      fileBuffer = Buffer.from(JSON.stringify(root), 'utf8');
+    }
+
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+    return res.status(200).send(fileBuffer);
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('[widgets/download] erro:', error);
+    return res.status(400).json({ message: 'Falha ao baixar widget' });
   }
 });
 

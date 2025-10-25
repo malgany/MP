@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (authenticated) {
       ensureMyWidgetsLink();
       if (cta) {
-        cta.textContent = 'Logout';
+        cta.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M10 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 8l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Logout';
         cta.href = '#logout';
         cta.setAttribute('data-logout', '');
         wireLogout(cta);

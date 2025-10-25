@@ -18,28 +18,20 @@
         </div>
         <nav class="main-nav">
             <a class="nav-link active" href="/">Home</a>
-            <a class="nav-link" href="/">Wildcats</a>
-            <a class="nav-link" href="/">Neolaser</a>
-            <a class="nav-link" href="/">Contato</a>
+            <a class="nav-link" href="/">Widgets</a>
+            <a class="nav-link" href="/">Creator</a>
         </nav>
         <a class="cta-subscribe" href="/auth/google" data-auth-cta>Entrar com Google</a>
     </header>
 
     <main class="dashboard-shell">
-        <section class="hero">
-            <div class="hero-content">
-                <h1>Welcome to your dashboard</h1>
-                <p>Use the logout button in the header when you want to end your session.</p>
-            </div>
-            <div class="hero-actions" style="justify-content: flex-end; align-self: start;">
-                <button class="btn primary" data-open-add-widget>+ widget</button>
-            </div>
-        </section>
-
         <section class="template-grid" id="user-widgets">
             <header>
                 <h2>Your widgets</h2>
                 <p>Saved widgets are listed here.</p>
+                <div class="template-actions">
+                    <button class="btn primary" data-open-add-widget>+ Widget</button>
+                </div>
             </header>
             <div class="user-widgets-grid" data-widgets-list></div>
         </section>
@@ -59,12 +51,12 @@
                     <p>Upload a .widget file or create a new one in Widget Studio</p>
                     <div class="hero-actions">
                         <a class="btn primary" href="https://widgets.chatkit.studio" target="_blank" rel="noopener">
-                            Create
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                                 <path d="M14 3h7v7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                 <path d="M10 14L21 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                 <path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
+                            Create
                         </a>
                         <button class="btn ghost" type="button" data-upload-widget>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">

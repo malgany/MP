@@ -5,6 +5,7 @@ const morgan = require('morgan');
 const passport = require('./config/passport');
 const authRoutes = require('./routes/auth');
 const widgetRoutes = require('./routes/widgets');
+const publicWidgetsRoutes = require('./routes/publicWidgets');
 const { ensureAuthenticated, exposeUser } = require('./middleware/auth');
 
 const app = express();
@@ -52,6 +53,7 @@ app.use('/assets', express.static(path.join(publicDir, 'assets')));
 app.use('/lib', express.static(libDir));
 
 app.use('/auth', authRoutes);
+app.use('/api/public/widgets', publicWidgetsRoutes);
 app.use('/api/widgets', ensureAuthenticated, widgetRoutes);
 
 app.get('/', (req, res) => {

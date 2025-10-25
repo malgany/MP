@@ -45,6 +45,9 @@ model Widget {
   view         String
   defaultState Json
   states       Json
+  raw          String?
+  fileName     String?
+  fileExt      String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
