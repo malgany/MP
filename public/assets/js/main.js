@@ -50,6 +50,21 @@ document.addEventListener('DOMContentLoaded', () => {
     return WidgetPreview.buildPreviewSrcdoc(innerHtml);
   }
 
+  // Pré-carrega o CSS core e injeta inline no iframe quando possível
+  (async () => {
+    try {
+      const resp = await fetch('/lib/core.css', { cache: 'force-cache' });
+      if (resp.ok) {
+        const css = await resp.text();
+        if (css && window.WidgetPreview && typeof window.WidgetPreview.setCoreCss === 'function') {
+          window.WidgetPreview.setCoreCss(css);
+        }
+      }
+    } catch (_) {
+      // silenciosamente ignora; o link fallback continuará funcionando
+    }
+  })();
+
   // modal preview wiring (reuse structure from internal app)
   const viewModalToggle = document.getElementById('viewWidgetToggle');
   const viewModal = document.querySelector('[data-view-widget-modal]');
