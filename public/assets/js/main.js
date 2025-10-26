@@ -122,7 +122,15 @@ document.addEventListener('DOMContentLoaded', () => {
             </svg>
             Download
           </a>
-          ` : ''}
+          ` : `
+          <button class="btn ghost" data-buy-widget data-id="${encodeURIComponent(item.id || '')}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M6 6h15l-1.5 9h-12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M6 6l-2-2H2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            Buy
+          </button>
+          `}
         </div>
       </div>
     `;
@@ -157,6 +165,38 @@ document.addEventListener('DOMContentLoaded', () => {
           window.location.href = dl.getAttribute('href');
         } catch (_) {
           window.location.href = '/auth/google';
+        }
+      });
+    }
+    // Comprar (premium) -> cria Checkout Session e redireciona
+    const buyBtn = card.querySelector('[data-buy-widget]');
+    if (buyBtn) {
+      buyBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        try {
+          // checa login
+          const statusResp = await fetch('/auth/status', { cache: 'no-store', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+          const status = statusResp.ok ? await statusResp.json() : { authenticated: false };
+          if (!status.authenticated) {
+            window.location.href = '/auth/google';
+            return;
+          }
+
+          const widgetId = buyBtn.getAttribute('data-id');
+          const resp = await fetch('/api/checkout/session', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ widgetId })
+          });
+          if (!resp.ok) throw new Error('Falha ao iniciar checkout');
+          const data = await resp.json();
+          if (data && data.url) {
+            window.location.href = data.url;
+          }
+        } catch (err) {
+          // eslint-disable-next-line no-console
+          console.error(err);
+          alert('Não foi possível iniciar a compra.');
         }
       });
     }

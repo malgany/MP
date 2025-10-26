@@ -18,6 +18,13 @@ async function findById(id) {
   });
 }
 
+async function updateStripeStatus(userId, data) {
+  return prisma.user.update({
+    where: { id: userId },
+    data,
+  });
+}
+
 async function findByGoogleId(googleId) {
   return prisma.user.findUnique({
     where: { googleId },
@@ -68,4 +75,5 @@ module.exports = {
   findById,
   findByGoogleId,
   upsertFromGoogle,
+  updateStripeStatus,
 };

@@ -148,7 +148,10 @@ router.get('/:id/download', async (req, res) => {
     const isOwner = widget.userId === req.user.id;
     const isFree = Number(widget.priceCents || 0) === 0;
     if (!isOwner && !isFree) {
-      return res.status(403).json({ message: 'Acesso negado' });
+      // verifica se o usuário comprou
+      const { prisma } = require('../db/prisma');
+      const paid = await prisma.order.findFirst({ where: { widgetId: id, buyerUserId: req.user.id, status: 'paid' } });
+      if (!paid) return res.status(403).json({ message: 'Acesso negado' });
     }
 
     let fileBuffer;

@@ -18,6 +18,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const titleError = modal ? modal.querySelector('[data-title-error]') : null;
   const priceError = modal ? modal.querySelector('[data-price-error]') : null;
   const listContainer = document.querySelector('[data-widgets-list]');
+  // Stripe Connect onboarding elements
+  const connectBtn = document.querySelector('[data-connect-stripe]');
+  const connectLoginBtn = document.querySelector('[data-connect-login]');
   // View modal elements
   const viewModalToggle = document.getElementById('viewWidgetToggle');
   const viewModal = document.querySelector('[data-view-widget-modal]');
@@ -417,4 +420,40 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
   loadExisting();
+
+  // ----- Stripe Connect onboarding (dashboard interno) -----
+  async function ensureStripeAccount() {
+    const resp = await fetch('/api/connect/accounts', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+    if (!resp.ok) throw new Error('Falha ao criar/obter conta Stripe');
+    return resp.json();
+  }
+
+  async function openOnboarding() {
+    await ensureStripeAccount();
+    const resp = await fetch('/api/connect/onboarding-link', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+    if (!resp.ok) throw new Error('Falha ao gerar link de onboarding');
+    const data = await resp.json();
+    if (data && data.url) window.location.href = data.url;
+  }
+
+  async function openExpressDashboard() {
+    const resp = await fetch('/api/connect/login-link', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+    if (!resp.ok) throw new Error('Falha ao gerar login do dashboard Stripe');
+    const data = await resp.json();
+    if (data && data.url) window.location.href = data.url;
+  }
+
+  if (connectBtn) {
+    connectBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      try { await openOnboarding(); } catch (err) { console.error(err); alert('Não foi possível iniciar o onboarding.'); }
+    });
+  }
+
+  if (connectLoginBtn) {
+    connectLoginBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      try { await openExpressDashboard(); } catch (err) { console.error(err); alert('Não foi possível abrir o dashboard.'); }
+    });
+  }
 });

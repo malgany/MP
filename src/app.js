@@ -6,6 +6,9 @@ const passport = require('./config/passport');
 const authRoutes = require('./routes/auth');
 const widgetRoutes = require('./routes/widgets');
 const publicWidgetsRoutes = require('./routes/publicWidgets');
+const connectRoutes = require('./routes/connect');
+const checkoutRoutes = require('./routes/checkout');
+const webhookRoutes = require('./routes/webhooks');
 const { ensureAuthenticated, exposeUser } = require('./middleware/auth');
 
 const app = express();
@@ -13,6 +16,9 @@ const app = express();
 if (process.env.NODE_ENV !== 'production') {
   app.use(morgan('dev'));
 }
+
+// Stripe webhook requer raw body, então montamos raw apenas na rota específica
+app.use('/webhooks', webhookRoutes);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -55,6 +61,8 @@ app.use('/lib', express.static(libDir));
 app.use('/auth', authRoutes);
 app.use('/api/public/widgets', publicWidgetsRoutes);
 app.use('/api/widgets', ensureAuthenticated, widgetRoutes);
+app.use('/api/connect', connectRoutes);
+app.use('/api/checkout', checkoutRoutes);
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(publicDir, 'index.html'));
