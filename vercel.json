@@ -1,0 +1,34 @@
+{
+  "functions": {
+    "api/**/*.js": {
+      "runtime": "nodejs20.x",
+      "includeFiles": [
+        "node_modules/jsdom/**",
+        "node_modules/parse5/**"
+      ]
+    },
+    "server.js": {
+      "runtime": "nodejs20.x",
+      "includeFiles": [
+        "node_modules/jsdom/**",
+        "node_modules/parse5/**"
+      ]
+    },
+    "src/server.js": {
+      "runtime": "nodejs20.x",
+      "includeFiles": [
+        "node_modules/jsdom/**",
+        "node_modules/parse5/**"
+      ]
+    },
+    "index.js": {
+      "runtime": "nodejs20.x",
+      "includeFiles": [
+        "node_modules/jsdom/**",
+        "node_modules/parse5/**"
+      ]
+    }
+  }
+}
+
+
